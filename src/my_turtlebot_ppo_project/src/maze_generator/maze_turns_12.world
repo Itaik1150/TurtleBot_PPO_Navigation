@@ -1,0 +1,285 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="wall_0">
+      <static>true</static>
+      <link name="link">
+        <pose>0.23076923076923078 0 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_1">
+      <static>true</static>
+      <link name="link">
+        <pose>0.46153846153846156 0.23076923076923078 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_2">
+      <static>true</static>
+      <link name="link">
+        <pose>0.6923076923076923 0.46153846153846156 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_3">
+      <static>true</static>
+      <link name="link">
+        <pose>0.9230769230769231 0.6923076923076923 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_4">
+      <static>true</static>
+      <link name="link">
+        <pose>1.153846153846154 0.9230769230769231 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_5">
+      <static>true</static>
+      <link name="link">
+        <pose>1.3846153846153848 1.153846153846154 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_6">
+      <static>true</static>
+      <link name="link">
+        <pose>1.6153846153846156 1.3846153846153848 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_7">
+      <static>true</static>
+      <link name="link">
+        <pose>1.8461538461538465 1.6153846153846156 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_8">
+      <static>true</static>
+      <link name="link">
+        <pose>2.076923076923077 1.8461538461538465 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_9">
+      <static>true</static>
+      <link name="link">
+        <pose>2.307692307692308 2.076923076923077 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_10">
+      <static>true</static>
+      <link name="link">
+        <pose>2.5384615384615388 2.307692307692308 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_11">
+      <static>true</static>
+      <link name="link">
+        <pose>2.7692307692307696 2.5384615384615388 0 0 0 1.57</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_12">
+      <static>true</static>
+      <link name="link">
+        <pose>3.0000000000000004 2.7692307692307696 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.46153846153846156 0.1 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

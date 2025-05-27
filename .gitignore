@@ -1,0 +1,9 @@
+build/
+devel/
+log/
+*.pyc
+*.swp
+*.user
+*.sublime-workspace
+.vscode/
+*.launch~

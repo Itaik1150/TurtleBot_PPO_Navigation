@@ -1,0 +1,11 @@
+<launch>
+  <!-- Load your world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find turtlebot3_ppo_LAST)/worlds/maze1.world" />
+  </include>
+
+  <!-- Spawn the robot -->
+  <node name="spawn_turtlebot3" pkg="gazebo_ros" type="spawn_model" output="screen"
+        args="-database turtlebot3_burger -sdf -model turtlebot3 -x 0 -y 0 -z 0.1"/>
+</launch>
+
