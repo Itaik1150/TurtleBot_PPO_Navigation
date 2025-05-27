@@ -9,8 +9,6 @@ To run the simulation world (with the robot and the maze), use the launch file:
 📄 `maze_world.launch`  
 (located in `src/my_turtlebot_ppo_project/launch/`)
 
-## 🧠 Code overview
-
 Core logic is handled in:
 
 - `src/my_turtlebot_ppo_project/train_ppo.py`
