@@ -1,5 +1,4 @@
 # TurtleBot PPO Navigation 🤖
-# TurtleBot PPO Navigation 🤖
 
 Hey Nir!  
 Feel free to clone this repo and explore 🚀
