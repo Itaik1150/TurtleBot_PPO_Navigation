@@ -61,13 +61,20 @@ class TurtleBot3Env(gym.Env):
 
         self.seed(42)
         self.step_count = 0
-        self.max_steps = 800
+        self.max_steps = 1000
         self.stuck_steps = 0
 
         self.initial_distance_to_goal = self.get_distance_to_goal()
 
+        self.min_dist = 0.15 #distance which is considered a crash
         self.last_time = rospy.Time.now()
         self.prev_position = None
+        self.previous_distance = None
+        self.prev_min_dist = None
+        self.prev_reward = 0.0
+        self.gamma = 0.99  # discount factor for advantage calculation
+        self.previous_distance = None
+        self.previous_goal_potential = 0.0
 
 
 
@@ -150,54 +157,101 @@ class TurtleBot3Env(gym.Env):
 
 
 
-    def reward(self, min_dist, goal_reached, crushed_a_wall, reached_max_step, stuck_too_long, linear_vel):
-        reward = 0.0
+    # def reward(self, distance_to_wall, goal_reached, crushed_a_wall, reached_max_step, stuck_too_long):
 
-        # === 1. Distances ===
         distance_to_goal = self.get_distance_to_goal()
-        distance_to_wall = min_dist
-        initial_distance = self.initial_distance_to_goal  # set once per episode
 
-        # === 2. Progress-based potential shaping ===
-        alpha = 1000.0
-        progress_ratio = 1.0 - (distance_to_goal / (initial_distance + 1e-5)) ** 2
-        goal_potential = alpha * progress_ratio
+        # === 1. פוטנציאל למטרה (shaping)
+        goal_potential = 1.0 - (distance_to_goal / (self.initial_distance_to_goal + 1e-5))
+        if self.previous_distance is None:
+            self.previous_distance = distance_to_goal
+            self.previous_goal_potential = goal_potential
 
-        # === 3. Wall proximity shaping ===
-        beta = 1000.0
-        gamma = 25.0
-        wall_potential = beta * np.exp(-gamma * max(distance_to_wall - 0.15, 0.0))
+        delta_goal = goal_potential - self.previous_goal_potential
+        goal_reward = 5.0 * delta_goal  # מתאים לטווח [-5, +5]
 
-        reward = goal_potential - wall_potential
+        # === 2. ענישה על קרבה לקיר (רק אם מתחת ל־0.3 מטר)
+        if distance_to_wall < 0.3:
+            wall_penalty_ratio = 1.0 - ((distance_to_wall - 0.15) / (0.3 - 0.15))  # normalized: 0 at 0.3, 1 at 0.15
+            wall_penalty = 3.0 * np.clip(wall_penalty_ratio, 0.0, 1.0)
+        else:
+            wall_penalty = 0.0
 
-        # === 4. Terminal signals ===
+        # === 3. עונש על חוסר תזוזה
+        progress = abs(distance_to_goal - self.previous_distance)
+        no_progress_penalty = 0.2 if progress < 0.01 else 0.0
+
+        # === 4. עונש קל על כל צעד
+        step_penalty = 0.01
+
+        # === 5. תגמולים סופיים
+        terminal_reward = 0.0
         if goal_reached:
-            reward += 2000.0
-        elif reached_max_step:
-            reward -= 10.0
-        if stuck_too_long:
-            reward -= 30.0
-
-        # # === 6. Straight movement bonus (based on linear velocity) ===
-        # straight_bonus = 0.0
-        # if linear_vel > 0.1:  # תנועה קדימה מורגשת
-        #     straight_bonus = linear_vel * 20.0  # מתגמל לפי העוצמה
-
-        # reward += straight_bonus
-
-
-
-        # === 5. Optional debug ===
-        if self.step_count % 200 == 0:
-            print("▶️ REWARD DEBUG")
-            print(f"   ▪ Goal Potential: {goal_potential:.2f}")
-            print(f"   ▪ Wall Potential:   {wall_potential:.2f}")
-            print(f"   ✅ Final Reward:   {reward:.2f}")
-
+            terminal_reward += 10.0
         if crushed_a_wall:
-            print("💥 COLLISION DETECTED")
+            terminal_reward -= 10.0
+        if stuck_too_long:
+            terminal_reward -= 5.0
+
+        # === 6. סכימה
+        reward = goal_reward - wall_penalty - step_penalty - no_progress_penalty + terminal_reward
+
+        # === 7. עדכון מצב קודם
+        self.previous_distance = distance_to_goal
+        self.previous_goal_potential = goal_potential
+
+        # === 8. הדפסה (לפי הצורך)
+        if self.step_count % 200 == 0:
+            print(f"▶️ REWARD DEBUG")
+            print(f"   ▪ Δgoal: {delta_goal:.3f} → Goal reward: {goal_reward:.2f}")
+            print(f"   ▪ Wall distance: {distance_to_wall:.2f} → Penalty: {wall_penalty:.2f}")
+            print(f"   ▪ Progress: {progress:.3f} → No progress penalty: {no_progress_penalty:.2f}")
+            print(f"   ▪ Total reward: {reward:.2f}")
 
         return reward
+
+
+    def reward(self, distance_to_wall, goal_reached, crushed_a_wall, reached_max_step, stuck_too_long):
+        distance_to_goal = self.get_distance_to_goal()
+
+        # 1. Goal reward (linear potential based on current distance)
+        progress_ratio = 1.0 - (distance_to_goal / (self.initial_distance_to_goal + 1e-5))
+        goal_progress_reward = 5.0 * progress_ratio**2
+        goal_progress_reward = np.clip(goal_progress_reward, 0.0, 5.0)  # keep in [0, 5]
+
+        # 2. Wall penalty (linear, only starts below 0.3m)
+        if distance_to_wall < 0.3:
+            wall_penalty = 2.0 * (0.3 - distance_to_wall) / 0.15  # 0.3→0, 0.15→2.0
+        else:
+            wall_penalty = 0.0
+
+        # 3. Step penalty
+        step_penalty = 0.05
+
+        # 4. Terminal reward
+        terminal_reward = 0.0
+        if goal_reached:
+            terminal_reward = 10.0
+        elif crushed_a_wall or stuck_too_long or reached_max_step:
+            terminal_reward = -10.0
+
+        survival_reward = 0.01
+
+
+        # 5. Final reward
+        reward = goal_progress_reward - wall_penalty - step_penalty + terminal_reward + survival_reward
+
+        # 6. Debug print
+        if self.step_count % 100 == 0:
+            print("▶️ REWARD DEBUG")
+            print(f"   ▪ Distance to goal: {distance_to_goal:.2f} → Goal reward: {goal_progress_reward:.2f}")
+            print(f"   ▪ Distance to wall: {distance_to_wall:.2f} → Wall penalty: {wall_penalty:.2f}")
+            print(f"   ▪ Step penalty: {step_penalty:.2f}")
+            print(f"   ▪ Terminal reward: {terminal_reward:.2f}")
+            print(f"   ✅ Final reward: {reward:.2f}")
+
+        return reward
+
 
     def reset(self):
         
@@ -243,6 +297,12 @@ class TurtleBot3Env(gym.Env):
         [self.get_distance_to_goal()]
         ]).astype(np.float32)
 
+        self.prev_distance_to_goal = None
+        self.prev_min_dist = None
+        self.prev_reward = 0.0
+        self.previous_distance = None
+        self.previous_state_value = 0.0
+
         return obs
 
     def step(self, action):
@@ -251,19 +311,22 @@ class TurtleBot3Env(gym.Env):
         # Check laser data is valid
         if self.laser_data is None or len(self.laser_data) != 24 or np.isnan(self.laser_data).any():
             print(f"[STEP {self.step_count}] WARNING: Invalid laser data. Returning safe fallback.")
-            fallback_obs = np.full((24,), 3.5, dtype=np.float32)
+            fallback_obs = np.concatenate([np.full((24,), 3.5), [0.0], [10.0]])
             return fallback_obs, 0.0, False, {}
 
         # 1. Calculate min distance to obstacle
-        min_dist = np.min(self.laser_data)
+        distance_to_wall = np.min(self.laser_data)
 
         # 2. Save previous distance to goal
         prev_distance_to_goal = self.get_distance_to_goal()
 
-        # 3. Publish velocity
+        # 3. Clip actions to action space bounds
+        action = np.clip(action, self.action_space.low, self.action_space.high)
+        
         vel = Twist()
         vel.linear.x = action[0]
         vel.angular.z = action[1]
+        
         self.cmd_vel_pub.publish(vel)
  
 
@@ -274,8 +337,8 @@ class TurtleBot3Env(gym.Env):
         current_distance_to_goal = self.get_distance_to_goal()
 
         # 7. Check termination
-        goal_reached = self.current_position[1] >= 1
-        crushed_a_wall = min_dist < 0.15
+        goal_reached = self.current_position[1] <= -1
+        crushed_a_wall = distance_to_wall < self.min_dist
         reached_max_step = self.step_count >= self.max_steps
 
         # Track if stuck for many steps
@@ -295,7 +358,7 @@ class TurtleBot3Env(gym.Env):
             "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅")
         
         # 8. Compute reward
-        reward = self.reward(min_dist, goal_reached,crushed_a_wall, reached_max_step, stuck_too_long, action[0] )
+        reward = self.reward(distance_to_wall, goal_reached,crushed_a_wall, reached_max_step, stuck_too_long,)
 
         # print(f"done: {done}")
         # print(f"goal_reached: {goal_reached}")
@@ -323,11 +386,22 @@ class TurtleBot3Env(gym.Env):
     def render(self, mode='human'):
         pass
 
+    def close(self):
+        rospy.signal_shutdown("Closing TurtleBot3Env")
+
 
 
 
 # check_env = TurtleBot3Env()
 # check_env.teleport_robot(model_name="turtlebot3",
-#                                 x=0,
-#                                 y=0,
+#                                 x=,
+#                                 y=-1,
 #                                 )
+
+# env = TurtleBot3Env()
+# obs = env.reset()
+# action = np.array([0.2, 0.0])
+# obs, reward, done, _ = env.step(action)
+# print("obs shape:", obs.shape)
+# print("reward:", reward, "done:", done)
+# env.close()

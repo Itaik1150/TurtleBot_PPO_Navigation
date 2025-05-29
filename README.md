@@ -1,6 +1,6 @@
 # TurtleBot PPO Navigation 🤖
 
-Hey Nir!  
+Hey!  
 Feel free to clone this repo and explore 🚀
 
 To run the simulation world (with the robot and the maze), use the launch file:
