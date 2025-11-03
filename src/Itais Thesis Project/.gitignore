@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.pytest_cache/
+
+# ROS (Catkin)
+build/
+devel/
+install/
+log/
+logs/
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
